@@ -4,8 +4,8 @@ from django.db import models
 class City(models.Model):
     name = models.CharField(max_length=25)
     dept = models.SmallIntegerField()
-    long = models.SmallIntegerField()
-    lat = models.SmallIntegerField()
+    long = models.FloatField()
+    lat = models.FloatField()
 
     class Meta:
         verbose_name = "city"
@@ -20,8 +20,8 @@ class Market(models.Model):
     day = models.CharField(max_length=12)
     _from = models.CharField(max_length=5)
     _to = models.CharField(max_length=5)
-    long = models.SmallIntegerField()
-    lat = models.SmallIntegerField()
+    long = models.FloatField()
+    lat = models.FloatField()
     city = models.ForeignKey('City', on_delete=models.CASCADE)
     nb_farmers = models.ForeignKey('NbFarmer', on_delete=models.CASCADE, default=1)
 
