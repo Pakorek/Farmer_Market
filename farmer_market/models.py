@@ -6,3 +6,10 @@ class City(models.Model):
     dept = models.SmallIntegerField()
     long = models.SmallIntegerField()
     lat = models.SmallIntegerField()
+
+    class Meta:
+        verbose_name = "city"
+        ordering = ['dept', 'name']
+
+    def __str__(self):
+        return self.name
