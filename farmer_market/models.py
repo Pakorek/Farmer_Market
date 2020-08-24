@@ -23,8 +23,7 @@ class Market(models.Model):
     long = models.SmallIntegerField()
     lat = models.SmallIntegerField()
     city = models.ForeignKey('City', on_delete=models.CASCADE)
-
-    # nb_farmers = models.ForeignKey('NbFarmer', on_delete=models.CASCADE)
+    nb_farmers = models.ForeignKey('NbFarmer', on_delete=models.CASCADE, default=1)
 
     class Meta:
         verbose_name = "market"
@@ -32,3 +31,15 @@ class Market(models.Model):
 
     def __str__(self):
         return self.place
+
+
+class NbFarmer(models.Model):
+    scale = models.CharField(max_length=5)
+    icon = models.ImageField(null=True)
+
+    class Meta:
+        verbose_name = "farmer"
+        ordering = ['id']
+
+    def __str__(self):
+        return self.scale
