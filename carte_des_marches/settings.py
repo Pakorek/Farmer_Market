@@ -56,7 +56,10 @@ ROOT_URLCONF = 'carte_des_marches.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # Cette ligne ajoute le dossier templates/ à la racine du projet
+            os.path.join(BASE_DIR, 'carte_des_marches/templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
