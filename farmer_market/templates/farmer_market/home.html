@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Markets Farmers Map{% endblock %}
 
@@ -6,17 +7,16 @@
     <style>
         body { margin: 0; padding: 0; }
         #map {
-            position: absolute;
+            position: relative;
             top: 0;
             bottom: 0;
             width: 100%;
-            height: 100%;
+            height: 700px;
         }
     </style>
 {% endblock %}
 
 {% block body %}
-    <h1>Hello Madafaka</h1>
     <div id='map'></div>
 {% endblock %}
 
@@ -26,8 +26,99 @@
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
-            center: [-74.5, 40], // starting position [lng, lat]
-            zoom: 9 // starting zoom
+            center: [4.3986525, 44.815194], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        ///////////////////////////////////////////////////////////////// HOVER EFFECT /////////////////////////////////////
+
+
+        var hoveredStateId = null;
+
+        map.on('load', function() {
+            map.addSource('states_custom', {
+                'type': 'geojson',
+                'data': '{% static 'carte_des_marches/js/ardeche.geojson' %}'
+            });
+
+            map.addLayer({
+                'id': 'state-fills',
+                'type': 'fill',
+                'source': 'states_custom',
+                'layout': {},
+                'paint': {
+                    'fill-color': '#00f5ff',
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.8,
+                        0.4
+                    ]
+                }
+            });
+
+            map.on('mousemove', 'state-fills', function (e) {
+                if (e.features.length > 0) {
+                    if (hoveredStateId) {
+                        map.setFeatureState(
+                            {source: 'states_custom', id: hoveredStateId},
+                            {hover: false}
+                        );
+                    }
+                    hoveredStateId = e.features[0].id;
+                    map.setFeatureState(
+                        {source: 'states_custom', id: hoveredStateId},
+                        {hover: true}
+                    );
+
+                }
+            });
+
+            map.on('mouseleave', 'state-fills', function () {
+                if (hoveredStateId) {
+                    map.setFeatureState(
+                        {source: 'states_custom', id: hoveredStateId},
+                        {hover: false}
+                    );
+                }
+                hoveredStateId = null;
+            });
+{% comment %}
+
+            function redirect() {
+                window.location.replace("/Country/show/" + hoveredStateId);
+            }
+
+{% endcomment %}
+            map.on('click', 'state-fills', function (e) {
+                if (e.features.length > 0) {
+                    if (hoveredStateId) {
+                        map.setFeatureState(
+                            {source: 'states_custom', id: hoveredStateId},
+                            {hover: false}
+                        );
+                    }
+                    hoveredStateId = e.features[0].id;
+                    map.setFeatureState(
+                        {source: 'states_custom', id: hoveredStateId},
+                        {hover: true}
+                    );
+                    {#map.onclick = redirect();#}
+
+                }
+            });
+
+            // var layerList = document.getElementById('menu');
+            // var inputs = layerList.getElementsByTagName('input');
+            //
+            // function switchLayer(layer) {
+            //     var layerId = layer.target.id;
+            //     map.setStyle('mapbox://styles/mapbox/' + layerId);
+            // }
+            //
+            // for (var i = 0; i < inputs.length; i++) {
+            //     inputs[i].onclick = switchLayer;
+            // }
         });
     </script>
 {% endblock %}
