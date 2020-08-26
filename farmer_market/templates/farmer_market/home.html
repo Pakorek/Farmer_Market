@@ -13,6 +13,18 @@
             width: 100%;
             height: 700px;
         }
+        #marker {
+            background-color: black;
+            background-size: cover;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+.mapboxgl-popup {
+max-width: 200px;
+}
     </style>
 {% endblock %}
 
@@ -107,6 +119,23 @@
 
                 }
             });
+
+            var city = [4.38716070063694, 44.89120382165605];
+
+            // create the popup
+            var popup = new mapboxgl.Popup({ offset: 25 }).setText(
+            'Marché de trucs'
+            );
+
+            // create DOM element for the marker
+            var el = document.createElement('div');
+            el.id = 'marker';
+
+            // create the marker
+            new mapboxgl.Marker(el)
+                .setLngLat(city)
+                .setPopup(popup) // sets a popup on this marker
+                .addTo(map);
 
             // var layerList = document.getElementById('menu');
             // var inputs = layerList.getElementsByTagName('input');
