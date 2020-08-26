@@ -2,6 +2,32 @@
 
 {% block title %}Markets Farmers Map{% endblock %}
 
+{% block stylesheet %}
+    <style>
+        body { margin: 0; padding: 0; }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <h1>Hello Madafaka</h1>
+    <div id='map'></div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicGFrb3JlayIsImEiOiJja2ViaHJobDIwOHgzMnRxeTlneTR3YWxsIn0.s5-UAgKJapTRz09WmvIAag';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+            center: [-74.5, 40], // starting position [lng, lat]
+            zoom: 9 // starting zoom
+        });
+    </script>
 {% endblock %}
