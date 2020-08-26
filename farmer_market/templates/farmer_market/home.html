@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Markets Farmers Map{% endblock %}
+
+{% block stylesheet %}
+    <style>
+        body { margin: 0; padding: 0; }
+        #map {
+            position: relative;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            height: 700px;
+        }
+        #marker {
+            background-color: black;
+            background-size: cover;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+.mapboxgl-popup {
+max-width: 200px;
+}
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div id='map'></div>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicGFrb3JlayIsImEiOiJja2ViaHJobDIwOHgzMnRxeTlneTR3YWxsIn0.s5-UAgKJapTRz09WmvIAag';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+            center: [4.3986525, 44.815194], // starting position [lng, lat]
+            zoom: 8 // starting zoom
+        });
+
+        ///////////////////////////////////////////////////////////////// HOVER EFFECT /////////////////////////////////////
+
+
+        var hoveredStateId = null;
+
+        map.on('load', function() {
+            map.addSource('ardeche_geojson', {
+                'type': 'geojson',
+                'data': '{% static 'carte_des_marches/js/ardeche.geojson' %}'
+            });
+
+            map.addLayer({
+                'id': 'state-fills',
+                'type': 'fill',
+                'source': 'ardeche_geojson',
+                'layout': {},
+                'paint': {
+                    'fill-color': '#00f5ff',
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.8,
+                        0.4
+                    ]
+                }
+            });
+
+            map.on('mousemove', 'state-fills', function (e) {
+                if (e.features.length > 0) {
+                    if (hoveredStateId) {
+                        map.setFeatureState(
+                            {source: 'ardeche_geojson', id: hoveredStateId},
+                            {hover: false}
+                        );
+                    }
+                    hoveredStateId = e.features[0].id;
+                    map.setFeatureState(
+                        {source: 'ardeche_geojson', id: hoveredStateId},
+                        {hover: true}
+                    );
+
+                }
+            });
+
+            map.on('mouseleave', 'state-fills', function () {
+                if (hoveredStateId) {
+                    map.setFeatureState(
+                        {source: 'ardeche_geojson', id: hoveredStateId},
+                        {hover: false}
+                    );
+                }
+                hoveredStateId = null;
+            });
+{% comment %}
+
+            function redirect() {
+                window.location.replace("/Country/show/" + hoveredStateId);
+            }
+
+{% endcomment %}
+            map.on('click', 'state-fills', function (e) {
+                if (e.features.length > 0) {
+                    if (hoveredStateId) {
+                        map.setFeatureState(
+                            {source: 'ardeche_geojson', id: hoveredStateId},
+                            {hover: false}
+                        );
+                    }
+                    hoveredStateId = e.features[0].id;
+                    map.setFeatureState(
+                        {source: 'ardeche_geojson', id: hoveredStateId},
+                        {hover: true}
+                    );
+                    {#map.onclick = redirect();#}
+
+                }
+            });
+
+            // test marker
+
+            var city = [4.38716070063694, 44.89120382165605];
+
+            // create the popup
+            var popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                'Marché de trucs'
+            );
+
+            // create DOM element for the marker
+            var el = document.createElement('div');
+            el.id = 'marker';
+
+            // create the marker
+            new mapboxgl.Marker(el)
+                .setLngLat(city)
+                .setPopup(popup) // sets a popup on this marker
+                .addTo(map);
+
+            // var layerList = document.getElementById('menu');
+            // var inputs = layerList.getElementsByTagName('input');
+            //
+            // function switchLayer(layer) {
+            //     var layerId = layer.target.id;
+            //     map.setStyle('mapbox://styles/mapbox/' + layerId);
+            // }
+            //
+            // for (var i = 0; i < inputs.length; i++) {
+            //     inputs[i].onclick = switchLayer;
+            // }
+
+            // GET ardeche_cities.json
+
+            var request = new XMLHttpRequest();
+            request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
+            request.send(null)
+            var ardeche_cities = JSON.parse(request.responseText);
+            console.log(ardeche_cities);
+
+{% comment %}
+            // add markers to map
+
+            geojson.features.forEach(function(marker) {
+                // create a DOM element for the marker
+                var el = document.createElement('div');
+                el.className = 'marker';
+                el.style.backgroundColor = 'black';
+                el.style.width = marker.properties.iconSize[0] + 'px';
+                el.style.height = marker.properties.iconSize[1] + 'px';
+
+                el.addEventListener('click', function() {
+                    window.alert(marker.properties.message);
+                });
+
+                // add marker to maparr
+                new mapboxgl.Marker(el)
+                    .setLngLat(marker.geometry.coordinates)
+                    .addTo(map);
+            });
+{% endcomment %}
+        });
+    </script>
+{% endblock %}

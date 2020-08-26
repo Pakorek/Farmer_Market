@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+    <title>{% block title %}Hello{% endblock %}</title>
+    <style>
+        body > header {
+            height: 80px;
+            text-align: center;
+            z-index: 5;
+            background-color: white;
+        }
+    </style>
+
+    {% block stylesheet %}{% endblock %}
+    </head>
+    <body>
+        <header>
+            <h1>Markets Farmers Map</h1>
+        </header>
+           <section class="container-fluid">
+               {% block body %}{% endblock %}
+           </section>
+        {% block javascript %}{% endblock %}
+        <footer>&copy; Markets Farmers Map</footer>
+    </body>
+</html>
