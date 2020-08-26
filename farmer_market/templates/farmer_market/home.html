@@ -120,11 +120,13 @@ max-width: 200px;
                 }
             });
 
+            // test marker
+
             var city = [4.38716070063694, 44.89120382165605];
 
             // create the popup
             var popup = new mapboxgl.Popup({ offset: 25 }).setText(
-            'Marché de trucs'
+                'Marché de trucs'
             );
 
             // create DOM element for the marker
@@ -148,55 +150,18 @@ max-width: 200px;
             // for (var i = 0; i < inputs.length; i++) {
             //     inputs[i].onclick = switchLayer;
             // }
-{% comment %}
-            var geojson = {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'message': 'Foo',
-                            'iconSize': [60, 60]
-                        },
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [-66.324462890625, -16.024695711685304]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'message': 'Bar',
-                            'iconSize': [50, 50]
-                        },
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [-61.2158203125, -15.97189158092897]
-                        }
-                    },
-                    {
-                        'type': 'Feature',
-                        'properties': {
-                            'message': 'Baz',
-                            'iconSize': [40, 40]
-                        },
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [-63.29223632812499, -18.28151823530889]
-                        }
-                    }
-                ]
-            };
-{% endcomment %}
+
+            // GET ardeche_cities.json
+
             var request = new XMLHttpRequest();
             request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
             request.send(null)
             var ardeche_cities = JSON.parse(request.responseText);
-            {#alert (my_JSON_object.result[0]);#}
             console.log(ardeche_cities);
 
-            // add markers to map
 {% comment %}
+            // add markers to map
+
             geojson.features.forEach(function(marker) {
                 // create a DOM element for the marker
                 var el = document.createElement('div');
