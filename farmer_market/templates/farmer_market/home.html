@@ -122,6 +122,7 @@ max-width: 200px;
 
             // test marker
 
+{% comment %}
             var city = [4.38716070063694, 44.89120382165605];
 
             // create the popup
@@ -138,6 +139,7 @@ max-width: 200px;
                 .setLngLat(city)
                 .setPopup(popup) // sets a popup on this marker
                 .addTo(map);
+{% endcomment %}
 
             // var layerList = document.getElementById('menu');
             // var inputs = layerList.getElementsByTagName('input');
@@ -157,7 +159,58 @@ max-width: 200px;
             request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
             request.send(null)
             var ardeche_cities = JSON.parse(request.responseText);
-            console.log(ardeche_cities);
+            console.log(ardeche_cities[0]);
+
+            let id = 0;
+            ardeche_cities.forEach(function(city) {
+                map.addSource(id, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                // feature for Mapbox DC
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [
+                                        city.gps_lng,
+                                        city.gps_lat
+                                    ]
+                                },
+                                'properties': {
+                                    'id': id,
+                                    'department_code': city.department_code,
+                                    'zip_code': city.zip_code,
+                                    'name': city.name,
+                                }
+                            }
+                        ]
+                    }
+                });
+                let lngLat = [city.gps_lng, city.gps_lat];
+
+                // create the popup
+                var popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                    'Marché de ' + city.name
+                );
+
+                // create DOM element for the marker
+                var el = document.createElement('div');
+                el.id = 'marker';
+
+                // create the marker
+                new mapboxgl.Marker(el)
+                    .setLngLat(lngLat)
+                    .setPopup(popup) // sets a popup on this marker
+                    .addTo(map);
+
+                ++id;
+                console.log(id, city.name);
+            });
+
+
+
 
 {% comment %}
             // add markers to map
