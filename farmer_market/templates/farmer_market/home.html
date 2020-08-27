@@ -13,41 +13,57 @@
             width: 100%;
             height: 700px;
         }
-        #marker {
+        .marker {
             background-color: black;
             background-size: cover;
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             cursor: pointer;
         }
 
-.mapboxgl-popup {
-max-width: 200px;
-}
+        .mapboxgl-popup {
+        max-width: 200px;
+        }
+
+        #menu {
+            position: absolute;
+            background: #fff;
+            padding: 10px;
+            font-family: 'Open Sans', sans-serif;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div id='map'></div>
+    <div id="menu">
+        <input id="streets-v11" type="radio" name="rtoggle" value="streets" />
+        <label for="streets-v11">streets</label>
+        <input id="light-v10" type="radio" name="rtoggle" value="light" />
+        <label for="light-v10">light</label>
+        <input id="dark-v10" type="radio" name="rtoggle" value="dark" checked/>
+        <label for="dark-v10">dark</label>
+        <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
+        <label for="outdoors-v11">outdoors</label>
+        <input id="satellite-v9" type="radio" name="rtoggle" value="satellite" />
+        <label for="satellite-v9">satellite</label>
+    </div>
 {% endblock %}
 
 {% block javascript %}
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicGFrb3JlayIsImEiOiJja2ViaHJobDIwOHgzMnRxeTlneTR3YWxsIn0.s5-UAgKJapTRz09WmvIAag';
-        var map = new mapboxgl.Map({
+        let map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+            style: 'mapbox://styles/mapbox/dark-v10', // stylesheet location
             center: [4.3986525, 44.815194], // starting position [lng, lat]
             zoom: 8 // starting zoom
         });
 
-        ///////////////////////////////////////////////////////////////// HOVER EFFECT /////////////////////////////////////
+        function addDataLayer() {
+            let hoveredStateId = null;
 
-
-        var hoveredStateId = null;
-
-        map.on('load', function() {
             map.addSource('ardeche_geojson', {
                 'type': 'geojson',
                 'data': '{% static 'carte_des_marches/js/ardeche.geojson' %}'
@@ -63,12 +79,12 @@ max-width: 200px;
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.8,
+                        0.1,
                         0.4
                     ]
                 }
             });
-
+            /////////////////////////////////////////////////////////////////// HOVER EFFECT //////////////////////////
             map.on('mousemove', 'state-fills', function (e) {
                 if (e.features.length > 0) {
                     if (hoveredStateId) {
@@ -102,6 +118,7 @@ max-width: 200px;
             }
 
 {% endcomment %}
+{% comment %}
             map.on('click', 'state-fills', function (e) {
                 if (e.features.length > 0) {
                     if (hoveredStateId) {
@@ -119,53 +136,178 @@ max-width: 200px;
 
                 }
             });
-
-            // test marker
-
-            var city = [4.38716070063694, 44.89120382165605];
-
-            // create the popup
-            var popup = new mapboxgl.Popup({ offset: 25 }).setText(
-                'Marché de trucs'
-            );
-
-            // create DOM element for the marker
-            var el = document.createElement('div');
-            el.id = 'marker';
-
-            // create the marker
-            new mapboxgl.Marker(el)
-                .setLngLat(city)
-                .setPopup(popup) // sets a popup on this marker
-                .addTo(map);
-
-            // var layerList = document.getElementById('menu');
-            // var inputs = layerList.getElementsByTagName('input');
-            //
-            // function switchLayer(layer) {
-            //     var layerId = layer.target.id;
-            //     map.setStyle('mapbox://styles/mapbox/' + layerId);
-            // }
-            //
-            // for (var i = 0; i < inputs.length; i++) {
-            //     inputs[i].onclick = switchLayer;
-            // }
+{% endcomment %}
 
             // GET ardeche_cities.json
 
-            var request = new XMLHttpRequest();
+            let request = new XMLHttpRequest();
             request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
             request.send(null)
-            var ardeche_cities = JSON.parse(request.responseText);
-            console.log(ardeche_cities);
+            let ardeche_cities = JSON.parse(request.responseText);
+
+            let features = "{\n" +
+                "\"type\": \"FeatureCollection\",\n" +
+                "\"features\": [\n";
+
+            // construct values for addSource('ardeche_cities').data -> dump and copy result in features.geojson
+            let id = 0;
+            ardeche_cities.forEach(function (city) {
+                features += "{\"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": ["+city.gps_lng+","+city.gps_lat+"]}, \"properties\": {\"id\": "+id+", \"department_code\": \""+city.department_code+"\", \"zip_code\": \""+city.zip_code+"\", \"name\": \""+city.name+"\"}},";
+                ++id;
+            });
+            // remove last comma
+            features = features.slice(0, -1);
+            features += "]}"
+            // console.log(features);
+
+            // construct clusters foreach cities
+            map.addSource('ardeche_cities', {
+                'type': 'geojson',
+                'data': "{% static 'carte_des_marches/js/features.geojson' %}",
+                cluster: true,
+                clusterMaxZoom: 14,
+                clusterRadius: 50
+            });
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'ardeche_cities',
+                filter: ['has', 'point_count'],
+                paint: {
+                    // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
+                    // with three steps to implement three types of circles:
+                    //   * Blue, 20px circles when point count is less than 100
+                    //   * Yellow, 30px circles when point count is between 100 and 750
+                    //   * Pink, 40px circles when point count is greater than or equal to 750
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#51bbd6',
+                        100,
+                        '#f1f075',
+                        750,
+                        '#f28cb1'
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        20,
+                        100,
+                        30,
+                        750,
+                        40
+                    ]
+                }
+            });
+
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'ardeche_cities',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                }
+            });
+
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'ardeche_cities',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#11b4da',
+                    'circle-radius': 4,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                }
+            });
+        }
+
+
+        map.on('load', function() {
+
+            addDataLayer();
+
+            let layerList = document.getElementById('menu');
+            let inputs = layerList.getElementsByTagName('input');
+
+            function switchLayer(layer) {
+                let layerId = layer.target.id;
+                map.setStyle('mapbox://styles/mapbox/' + layerId);
+            }
+
+            for (let i = 0; i < inputs.length; i++) {
+                inputs[i].onclick = switchLayer;
+            }
+
+            map.on('style.load', function () {
+                // Triggered when `setStyle` is called.
+                addDataLayer();
+            });
+
+            // inspect a cluster on click
+            map.on('click', 'clusters', function(e) {
+                var features = map.queryRenderedFeatures(e.point, {
+                    layers: ['clusters']
+                });
+
+                var clusterId = features[0].properties.cluster_id;
+                map.getSource('ardeche_cities').getClusterExpansionZoom(
+                    clusterId,
+                    function(err, zoom) {
+                        if (err) return;
+
+                        map.easeTo({
+                            center: features[0].geometry.coordinates,
+                            zoom: zoom
+                        });
+                    }
+                );
+            });
+
+            map.on('click', 'unclustered-point', function(e) {
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                let name = e.features[0].properties.name;
+                let zip_code = e.features[0].properties.zip_code;
+
+                // Ensure that if the map is zoomed out such that
+                // multiple copies of the feature are visible, the
+                // popup appears over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(
+                        '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>'
+                    )
+                    .addTo(map);
+            });
 
 {% comment %}
-            // add markers to map
+            map.on('mouseenter', 'clusters', function() {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'clusters', function() {
+                map.getCanvas().style.cursor = '';
+            });
 
-            geojson.features.forEach(function(marker) {
-                // create a DOM element for the marker
-                var el = document.createElement('div');
+{% endcomment %}
+
+
+{% comment %}
+                let popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                    'Marché de ' + city.name
+                );
+
+                // create DOM element for the marker
+                let el = document.createElement('div');
                 el.className = 'marker';
+                el.id = city.id;
                 el.style.backgroundColor = 'black';
                 el.style.width = marker.properties.iconSize[0] + 'px';
                 el.style.height = marker.properties.iconSize[1] + 'px';
@@ -174,12 +316,19 @@ max-width: 200px;
                     window.alert(marker.properties.message);
                 });
 
-                // add marker to maparr
+                // create the marker
+                let lngLat = [city.gps_lng, city.gps_lat];
+
                 new mapboxgl.Marker(el)
-                    .setLngLat(marker.geometry.coordinates)
+                    .setLngLat(lngLat)
+                    .setPopup(popup) // sets a popup on this marker
                     .addTo(map);
+
+                ++id;
+                console.log(id, city.name);
             });
 {% endcomment %}
+
         });
     </script>
 {% endblock %}
