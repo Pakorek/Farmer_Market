@@ -25,11 +25,30 @@
         .mapboxgl-popup {
         max-width: 200px;
         }
+
+        #menu {
+            position: absolute;
+            background: #fff;
+            padding: 10px;
+            font-family: 'Open Sans', sans-serif;
+        }
     </style>
 {% endblock %}
 
 {% block body %}
     <div id='map'></div>
+    <div id="menu">
+        <input id="streets-v11" type="radio" name="rtoggle" value="streets" />
+        <label for="streets-v11">streets</label>
+        <input id="light-v10" type="radio" name="rtoggle" value="light" />
+        <label for="light-v10">light</label>
+        <input id="dark-v10" type="radio" name="rtoggle" value="dark" checked/>
+        <label for="dark-v10">dark</label>
+        <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
+        <label for="outdoors-v11">outdoors</label>
+        <input id="satellite-v9" type="radio" name="rtoggle" value="satellite" />
+        <label for="satellite-v9">satellite</label>
+    </div>
 {% endblock %}
 
 {% block javascript %}
@@ -37,7 +56,7 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoicGFrb3JlayIsImEiOiJja2ViaHJobDIwOHgzMnRxeTlneTR3YWxsIn0.s5-UAgKJapTRz09WmvIAag';
         var map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/light-v10', // stylesheet location
+            style: 'mapbox://styles/mapbox/dark-v10', // stylesheet location
             center: [4.3986525, 44.815194], // starting position [lng, lat]
             zoom: 8 // starting zoom
         });
@@ -47,7 +66,7 @@
 
         var hoveredStateId = null;
 
-        map.on('load', function() {
+        function addDataLayer() {
             map.addSource('ardeche_geojson', {
                 'type': 'geojson',
                 'data': '{% static 'carte_des_marches/js/ardeche.geojson' %}'
@@ -63,13 +82,12 @@
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.3,
-                        0.8
+                        0.1,
+                        0.4
                     ]
                 }
             });
-
-            map.on('mousemove', 'state-fills', function (e) {
+                        map.on('mousemove', 'state-fills', function (e) {
                 if (e.features.length > 0) {
                     if (hoveredStateId) {
                         map.setFeatureState(
@@ -119,18 +137,6 @@
 
                 }
             });
-
-            // var layerList = document.getElementById('menu');
-            // var inputs = layerList.getElementsByTagName('input');
-            //
-            // function switchLayer(layer) {
-            //     var layerId = layer.target.id;
-            //     map.setStyle('mapbox://styles/mapbox/' + layerId);
-            // }
-            //
-            // for (var i = 0; i < inputs.length; i++) {
-            //     inputs[i].onclick = switchLayer;
-            // }
 
             // GET ardeche_cities.json
 
@@ -218,6 +224,31 @@
                     'circle-stroke-color': '#fff'
                 }
             });
+        }
+
+
+        map.on('load', function() {
+
+            addDataLayer();
+
+
+            var layerList = document.getElementById('menu');
+            var inputs = layerList.getElementsByTagName('input');
+
+            function switchLayer(layer) {
+                var layerId = layer.target.id;
+                map.setStyle('mapbox://styles/mapbox/' + layerId);
+            }
+
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].onclick = switchLayer;
+            }
+
+            map.on('style.load', function () {
+                // Triggered when `setStyle` is called.
+                addDataLayer();
+            });
+
 
 {% comment %}
                 var popup = new mapboxgl.Popup({ offset: 25 }).setText(
