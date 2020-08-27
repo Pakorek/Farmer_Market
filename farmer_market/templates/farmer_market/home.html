@@ -235,6 +235,8 @@
             // Add zoom and rotation controls to the map.
             map.addControl(new mapboxgl.NavigationControl());
 
+            map.addControl(new mapboxgl.FullscreenControl());
+
             let layerList = document.getElementById('menu');
             let inputs = layerList.getElementsByTagName('input');
 
