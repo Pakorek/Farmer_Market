@@ -157,7 +157,7 @@
 
             map.addSource('ardeche_cities', {
                 'type': 'geojson',
-                'data': features,
+                'data': "{% static 'carte_des_marches/js/features.geojson' %}",
                 cluster: true,
                 clusterMaxZoom: 14,
                 clusterRadius: 50
