@@ -268,6 +268,36 @@
                 );
             });
 
+            map.on('click', 'unclustered-point', function(e) {
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                let name = e.features[0].properties.name;
+                let zip_code = e.features[0].properties.zip_code;
+
+                // Ensure that if the map is zoomed out such that
+                // multiple copies of the feature are visible, the
+                // popup appears over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(
+                        '<strong>Marché de : ' + name + ' - ' + zip_code + '</strong>'
+                    )
+                    .addTo(map);
+            });
+
+{% comment %}
+            map.on('mouseenter', 'clusters', function() {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'clusters', function() {
+                map.getCanvas().style.cursor = '';
+            });
+
+{% endcomment %}
+
 
 {% comment %}
                 let popup = new mapboxgl.Popup({ offset: 25 }).setText(

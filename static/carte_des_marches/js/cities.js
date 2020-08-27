@@ -1,11 +1,32 @@
-var request = new XMLHttpRequest();
-request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
-request.send(null)
-var ardeche_cities = JSON.parse(request.responseText);
-
-let features = [];
-let id = 0;
-ardeche_cities.forEach(function (city) {
-    features.push(" {\n\"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": ["+city.gps_lng+","+city.gps_lat+"]}, \"properties\": {'id': "+id+", \"department_code\": "+city.department_code+", \"zip_code\": "+city.zip_code+", 'name': "+city.name+"},\n");
+map.on('click', 'unclustered-point', function(e) {
+var coordinates = e.features[0].geometry.coordinates.slice();
+var mag = e.features[0].properties.mag;
+var tsunami;
+ 
+if (e.features[0].properties.tsunami === 1) {
+tsunami = 'yes';
+} else {
+tsunami = 'no';
+}
+ 
+// Ensure that if the map is zoomed out such that
+// multiple copies of the feature are visible, the
+// popup appears over the copy being pointed to.
+while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+}
+ 
+new mapboxgl.Popup()
+.setLngLat(coordinates)
+.setHTML(
+'magnitude: ' + mag + '<br>Was there a tsunami?: ' + tsunami
+)
+.addTo(map);
 });
-export {features};
+ 
+map.on('mouseenter', 'clusters', function() {
+map.getCanvas().style.cursor = 'pointer';
+});
+map.on('mouseleave', 'clusters', function() {
+map.getCanvas().style.cursor = '';
+});
