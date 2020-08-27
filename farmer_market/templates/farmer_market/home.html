@@ -163,90 +163,63 @@
                 clusterRadius: 50
             });
             map.addLayer({
-id: 'clusters',
-type: 'circle',
-source: 'ardeche_cities',
-filter: ['has', 'point_count'],
-paint: {
-// Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
-// with three steps to implement three types of circles:
-//   * Blue, 20px circles when point count is less than 100
-//   * Yellow, 30px circles when point count is between 100 and 750
-//   * Pink, 40px circles when point count is greater than or equal to 750
-'circle-color': [
-'step',
-['get', 'point_count'],
-'#51bbd6',
-100,
-'#f1f075',
-750,
-'#f28cb1'
-],
-'circle-radius': [
-'step',
-['get', 'point_count'],
-20,
-100,
-30,
-750,
-40
-]
-}
-});
+                id: 'clusters',
+                type: 'circle',
+                source: 'ardeche_cities',
+                filter: ['has', 'point_count'],
+                paint: {
+                    // Use step expressions (https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
+                    // with three steps to implement three types of circles:
+                    //   * Blue, 20px circles when point count is less than 100
+                    //   * Yellow, 30px circles when point count is between 100 and 750
+                    //   * Pink, 40px circles when point count is greater than or equal to 750
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#51bbd6',
+                        100,
+                        '#f1f075',
+                        750,
+                        '#f28cb1'
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        20,
+                        100,
+                        30,
+                        750,
+                        40
+                    ]
+                }
+            });
 
-map.addLayer({
-id: 'cluster-count',
-type: 'symbol',
-source: 'ardeche_cities',
-filter: ['has', 'point_count'],
-layout: {
-'text-field': '{point_count_abbreviated}',
-'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-'text-size': 12
-}
-});
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'ardeche_cities',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                }
+            });
 
-map.addLayer({
-id: 'unclustered-point',
-type: 'circle',
-source: 'ardeche_cities',
-filter: ['!', ['has', 'point_count']],
-paint: {
-'circle-color': '#11b4da',
-'circle-radius': 4,
-'circle-stroke-width': 1,
-'circle-stroke-color': '#fff'
-}
-});
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'ardeche_cities',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#11b4da',
+                    'circle-radius': 4,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                }
+            });
 
 {% comment %}
-            let id = 0;
-            ardeche_cities.forEach(function(city) {
-                map.addSource('ardeche_cities', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                // feature for Mapbox DC
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': [
-                                        city.gps_lng,
-                                        city.gps_lat
-                                    ]
-                                },
-                                'properties': {
-                                    'id': id,
-                                    'department_code': city.department_code,
-                                    'zip_code': city.zip_code,
-                                    'name': city.name,
-                                }
-                            }
-                        ]
-                    }
-                });
                 var popup = new mapboxgl.Popup({ offset: 25 }).setText(
                     'Marché de ' + city.name
                 );
@@ -254,7 +227,7 @@ paint: {
                 // create DOM element for the marker
                 var el = document.createElement('div');
                 el.className = 'marker';
-                el.id = 'marker';
+                el.id = city.id;
                 el.style.backgroundColor = 'black';
                 el.style.width = marker.properties.iconSize[0] + 'px';
                 el.style.height = marker.properties.iconSize[1] + 'px';
@@ -262,8 +235,7 @@ paint: {
                 el.addEventListener('click', function() {
                     window.alert(marker.properties.message);
                 });
-{% endcomment %}
-            {% comment %}
+
                 // create the marker
                 let lngLat = [city.gps_lng, city.gps_lat];
 
@@ -275,7 +247,7 @@ paint: {
                 ++id;
                 console.log(id, city.name);
             });
-        {% endcomment %}
+{% endcomment %}
 
         });
     </script>
