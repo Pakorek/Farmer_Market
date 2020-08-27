@@ -54,19 +54,16 @@
 {% block javascript %}
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicGFrb3JlayIsImEiOiJja2ViaHJobDIwOHgzMnRxeTlneTR3YWxsIn0.s5-UAgKJapTRz09WmvIAag';
-        var map = new mapboxgl.Map({
+        let map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/dark-v10', // stylesheet location
             center: [4.3986525, 44.815194], // starting position [lng, lat]
             zoom: 8 // starting zoom
         });
 
-        ///////////////////////////////////////////////////////////////// HOVER EFFECT /////////////////////////////////////
-
-
-        var hoveredStateId = null;
-
         function addDataLayer() {
+            let hoveredStateId = null;
+
             map.addSource('ardeche_geojson', {
                 'type': 'geojson',
                 'data': '{% static 'carte_des_marches/js/ardeche.geojson' %}'
@@ -87,7 +84,8 @@
                     ]
                 }
             });
-                        map.on('mousemove', 'state-fills', function (e) {
+            /////////////////////////////////////////////////////////////////// HOVER EFFECT //////////////////////////
+            map.on('mousemove', 'state-fills', function (e) {
                 if (e.features.length > 0) {
                     if (hoveredStateId) {
                         map.setFeatureState(
@@ -120,6 +118,7 @@
             }
 
 {% endcomment %}
+{% comment %}
             map.on('click', 'state-fills', function (e) {
                 if (e.features.length > 0) {
                     if (hoveredStateId) {
@@ -137,18 +136,20 @@
 
                 }
             });
+{% endcomment %}
 
             // GET ardeche_cities.json
 
-            var request = new XMLHttpRequest();
+            let request = new XMLHttpRequest();
             request.open("GET", "{% static 'carte_des_marches/js/ardeche_cities.json' %}", false);
             request.send(null)
-            var ardeche_cities = JSON.parse(request.responseText);
+            let ardeche_cities = JSON.parse(request.responseText);
 
             let features = "{\n" +
                 "\"type\": \"FeatureCollection\",\n" +
                 "\"features\": [\n";
 
+            // construct values for addSource('ardeche_cities').data -> dump and copy result in features.geojson
             let id = 0;
             ardeche_cities.forEach(function (city) {
                 features += "{\"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": ["+city.gps_lng+","+city.gps_lat+"]}, \"properties\": {\"id\": "+id+", \"department_code\": \""+city.department_code+"\", \"zip_code\": \""+city.zip_code+"\", \"name\": \""+city.name+"\"}},";
@@ -157,10 +158,9 @@
             // remove last comma
             features = features.slice(0, -1);
             features += "]}"
-
-            // now in features.geojson
             // console.log(features);
 
+            // construct clusters foreach cities
             map.addSource('ardeche_cities', {
                 'type': 'geojson',
                 'data': "{% static 'carte_des_marches/js/features.geojson' %}",
@@ -231,16 +231,15 @@
 
             addDataLayer();
 
-
-            var layerList = document.getElementById('menu');
-            var inputs = layerList.getElementsByTagName('input');
+            let layerList = document.getElementById('menu');
+            let inputs = layerList.getElementsByTagName('input');
 
             function switchLayer(layer) {
-                var layerId = layer.target.id;
+                let layerId = layer.target.id;
                 map.setStyle('mapbox://styles/mapbox/' + layerId);
             }
 
-            for (var i = 0; i < inputs.length; i++) {
+            for (let i = 0; i < inputs.length; i++) {
                 inputs[i].onclick = switchLayer;
             }
 
@@ -249,14 +248,34 @@
                 addDataLayer();
             });
 
+            // inspect a cluster on click
+            map.on('click', 'clusters', function(e) {
+                var features = map.queryRenderedFeatures(e.point, {
+                    layers: ['clusters']
+                });
+
+                var clusterId = features[0].properties.cluster_id;
+                map.getSource('ardeche_cities').getClusterExpansionZoom(
+                    clusterId,
+                    function(err, zoom) {
+                        if (err) return;
+
+                        map.easeTo({
+                            center: features[0].geometry.coordinates,
+                            zoom: zoom
+                        });
+                    }
+                );
+            });
+
 
 {% comment %}
-                var popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                let popup = new mapboxgl.Popup({ offset: 25 }).setText(
                     'Marché de ' + city.name
                 );
 
                 // create DOM element for the marker
-                var el = document.createElement('div');
+                let el = document.createElement('div');
                 el.className = 'marker';
                 el.id = city.id;
                 el.style.backgroundColor = 'black';
