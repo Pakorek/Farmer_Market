@@ -10,14 +10,15 @@
             position: relative;
             top: 0;
             bottom: 0;
-            width: 100%;
+            width: 600px;
             height: 700px;
+            margin: 0 auto;
         }
         .marker {
             background-color: black;
             background-size: cover;
-            width: 8px;
-            height: 8px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             cursor: pointer;
         }
@@ -27,10 +28,15 @@
         }
 
         #menu {
-            position: absolute;
             background: #fff;
             padding: 10px;
             font-family: 'Open Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        #menu > label {
+            margin-right: 10px;
         }
     </style>
 {% endblock %}
@@ -150,14 +156,14 @@
                 "\"features\": [\n";
 
             // construct values for addSource('ardeche_cities').data -> dump and copy result in features.geojson
-            let id = 0;
-            ardeche_cities.forEach(function (city) {
-                features += "{\"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": ["+city.gps_lng+","+city.gps_lat+"]}, \"properties\": {\"id\": "+id+", \"department_code\": \""+city.department_code+"\", \"zip_code\": \""+city.zip_code+"\", \"name\": \""+city.name+"\"}},";
-                ++id;
-            });
+            //let id = 0;
+            //ardeche_cities.forEach(function (city) {
+            //    features += "{\"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": ["+city.gps_lng+","+city.gps_lat+"]}, \"properties\": {\"id\": "+id+", \"department_code\": \""+city.department_code+"\", \"zip_code\": \""+city.zip_code+"\", \"name\": \""+city.name+"\"}},";
+            //    ++id;
+            //});
             // remove last comma
-            features = features.slice(0, -1);
-            features += "]}"
+            //features = features.slice(0, -1);
+            //features += "]}"
             // console.log(features);
 
             // construct clusters foreach cities
@@ -230,6 +236,11 @@
         map.on('load', function() {
 
             addDataLayer();
+
+            // Add zoom and rotation controls to the map.
+            map.addControl(new mapboxgl.NavigationControl());
+
+            map.addControl(new mapboxgl.FullscreenControl());
 
             let layerList = document.getElementById('menu');
             let inputs = layerList.getElementsByTagName('input');
