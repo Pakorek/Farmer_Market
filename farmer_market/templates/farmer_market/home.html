@@ -24,7 +24,26 @@
         }
 
         .mapboxgl-popup {
-        max-width: 200px;
+            max-width: 200px;
+        }
+
+        .mapboxgl-popup-content {
+            background-color: #daa520;
+            color: white;
+        }
+
+        .mapboxgl-popup .market {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .mapboxgl-popup .location {
+            font-size: 1rem;
+
+        }
+
+        .mapboxgl-popup .from_to {
+            font-size: 1rem;
         }
 
         #menu {
@@ -81,12 +100,13 @@
                 'source': 'ardeche_geojson',
                 'layout': {},
                 'paint': {
-                    'fill-color': '#00f5ff',
+                    {#'fill-color': '#00f5ff',#}
+                    'fill-color': '#008000',
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.1,
-                        0.4
+                        0.2,
+                        0.5
                     ]
                 }
             });
@@ -405,9 +425,9 @@
                     new mapboxgl.Popup()
                         .setLngLat(coordinates)
                         .setHTML(
-                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
-                            '<p>' + location + '</p>' +
-                            '<p>' + day + ' de ' + from + ' à ' + to + '</p>' +
+                            '<p class="market">Marché de ' + name + '</p>' +
+                            '<p class="location">' + location + ' - <span>' + zip_code + '</span></p>' +
+                            '<p class="from_to">' + day.toUpperCase() + ' de ' + from + ' à ' + to + '</p>' +
                             '<em>' + info + '</em>'
                         )
                         .addTo(map);
