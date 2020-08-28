@@ -210,7 +210,7 @@
                         ['get', 'point_count'],
                         '#42DBA7',
                         100,
-                        '#f1f075',
+                        '#42DBA7',
                         750,
                         '#f28cb1'
                     ],
@@ -262,6 +262,16 @@
             map.addControl(new mapboxgl.NavigationControl());
 
             map.addControl(new mapboxgl.FullscreenControl());
+
+            // Add geolocate control to the map.
+            map.addControl(
+                new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: true
+                    },
+                    trackUserLocation: true
+                })
+            );
 
             let layerList = document.getElementById('menu');
             let inputs = layerList.getElementsByTagName('input');
