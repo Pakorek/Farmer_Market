@@ -5,62 +5,14 @@
 
 {% block stylesheet %}
     <style>
-        body { margin: 0; padding: 0; }
-        #map {
-            position: relative;
-            top: 0;
-            bottom: 0;
-            width: 600px;
-            height: 700px;
-            margin: 0 auto;
-        }
-        .marker {
-            background-color: black;
-            background-size: cover;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .mapboxgl-popup {
-            max-width: 200px;
-        }
-
-        .mapboxgl-popup-content {
-            background-color: #daa520;
-            color: white;
-        }
-
-        .mapboxgl-popup .market {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .mapboxgl-popup .location {
-            font-size: 1rem;
-
-        }
-
-        .mapboxgl-popup .from_to {
-            font-size: 1rem;
-        }
-
-        #menu {
-            background: #fff;
-            padding: 10px;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            justify-content: center;
-        }
-
-        #menu > label {
-            margin-right: 10px;
-        }
     </style>
 {% endblock %}
 
 {% block body %}
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
     <div id='map'></div>
     <div id="menu">
         <input id="streets-v11" type="radio" name="rtoggle" value="streets" />
@@ -258,10 +210,12 @@
 
             addDataLayer();
 
-            // Add zoom and rotation controls to the map.
-            map.addControl(new mapboxgl.NavigationControl());
-
-            map.addControl(new mapboxgl.FullscreenControl());
+            map.addControl(
+                new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken,
+                    mapboxgl: mapboxgl
+                })
+            );
 
             // Add geolocate control to the map.
             map.addControl(
@@ -272,6 +226,11 @@
                     trackUserLocation: true
                 })
             );
+
+            // Add zoom and rotation controls to the map.
+            map.addControl(new mapboxgl.NavigationControl());
+
+            map.addControl(new mapboxgl.FullscreenControl());
 
             let layerList = document.getElementById('menu');
             let inputs = layerList.getElementsByTagName('input');
