@@ -280,9 +280,11 @@
             });
 
             map.on('click', 'unclustered-point', function(e) {
-                var coordinates = e.features[0].geometry.coordinates.slice();
+                let coordinates = e.features[0].geometry.coordinates.slice();
                 let name = e.features[0].properties.name;
                 let zip_code = e.features[0].properties.zip_code;
+
+                let properties = e.features[0].properties;
 
                 // Ensure that if the map is zoomed out such that
                 // multiple copies of the feature are visible, the
@@ -291,12 +293,125 @@
                     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                 }
 
-                new mapboxgl.Popup()
-                    .setLngLat(coordinates)
-                    .setHTML(
-                        '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>'
-                    )
-                    .addTo(map);
+                if (properties.day4) {
+                    let location1 = properties.location1??'';
+                    let location2 = properties.location2??'';
+                    let location3 = properties.location3??'';
+                    let location4 = properties.location4??'';
+                    let day1 = properties.day1??'';
+                    let day2 = properties.day2??'';
+                    let day3 = properties.day3??'';
+                    let day4 = properties.day4??'';
+                    let from1 = properties.from1??'';
+                    let from2 = properties.from2??'';
+                    let from3 = properties.from3??'';
+                    let from4 = properties.from4??'';
+                    let to1 = properties.to1??'';
+                    let to2 = properties.to2??'';
+                    let to3 = properties.to3??'';
+                    let to4 = properties.to4??'';
+                    let info1 = properties.info1??'';
+                    let info2 = properties.info2??'';
+                    let info3 = properties.info3??'';
+                    let info4 = properties.info4??'';
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(
+                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
+                            '<p>' + location1 + '</p>' +
+                            '<p>' + day1 + ' de ' + from1 + ' à ' + to1 + '</p>' +
+                            '<em>' + info1 + '</em><br>' +
+                            '<p>' + location2 + '</p>' +
+                            '<p>' + day2 + ' de ' + from2 + ' à ' + to2 + '</p>' +
+                            '<em>' + info2 + '</em><br>' +
+                            '<p>' + location3 + '</p>' +
+                            '<p>' + day3 + ' de ' + from3 + ' à ' + to3 + '</p>' +
+                            '<em>' + info3 + '</em>' +
+                            '<p>' + location4 + '</p>' +
+                            '<p>' + day4 + ' de ' + from4 + ' à ' + to4 + '</p>' +
+                            '<em>' + info4 + '</em>'
+                        )
+                        .addTo(map);
+                }
+
+                if (properties.day3) {
+                    let location1 = properties.location1??'';
+                    let location2 = properties.location2??'';
+                    let location3 = properties.location3??'';
+                    let day1 = properties.day1??'';
+                    let day2 = properties.day2??'';
+                    let day3 = properties.day3??'';
+                    let from1 = properties.from1??'';
+                    let from2 = properties.from2??'';
+                    let from3 = properties.from3??'';
+                    let to1 = properties.to1??'';
+                    let to2 = properties.to2??'';
+                    let to3 = properties.to3??'';
+                    let info1 = properties.info1??'';
+                    let info2 = properties.info2??'';
+                    let info3 = properties.info3??'';
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(
+                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
+                            '<p>' + location1 + '</p>' +
+                            '<p>' + day1 + ' de ' + from1 + ' à ' + to1 + '</p>' +
+                            '<em>' + info1 + '</em><br>' +
+                            '<p>' + location2 + '</p>' +
+                            '<p>' + day2 + ' de ' + from2 + ' à ' + to2 + '</p>' +
+                            '<em>' + info2 + '</em><br>' +
+                            '<p>' + location3 + '</p>' +
+                            '<p>' + day3 + ' de ' + from3 + ' à ' + to3 + '</p>' +
+                            '<em>' + info3 + '</em>'
+                        )
+                        .addTo(map);
+                }
+
+                if (properties.day2) {
+                    let location1 = properties.location1??'';
+                    let location2 = properties.location2??'';
+                    let day1 = properties.day1??'';
+                    let day2 = properties.day2??'';
+                    let from1 = properties.from1??'';
+                    let from2 = properties.from2??'';
+                    let to1 = properties.to1??'';
+                    let to2 = properties.to2??'';
+                    let info1 = properties.info1??'';
+                    let info2 = properties.info2??'';
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(
+                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
+                            '<p>' + location1 + '</p>' +
+                            '<p>' + day1 + ' de ' + from1 + ' à ' + to1 + '</p>' +
+                            '<em>' + info1 + '</em><br>' +
+                            '<p>' + location2 + '</p>' +
+                            '<p>' + day2 + ' de ' + from2 + ' à ' + to2 + '</p>' +
+                            '<em>' + info2 + '</em>'
+                        )
+                        .addTo(map);
+                }
+
+                if (properties.day) {
+                    let location = properties.location??'';
+                    let day = properties.day??'';
+                    let from = properties.from??'';
+                    let to = properties.to??'';
+                    let info = properties.info??'';
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(
+                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
+                            '<p>' + location + '</p>' +
+                            '<p>' + day + ' de ' + from + ' à ' + to + '</p>' +
+                            '<em>' + info + '</em>'
+                        )
+                        .addTo(map);
+                }
             });
 
 {% comment %}
