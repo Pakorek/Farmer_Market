@@ -5,43 +5,14 @@
 
 {% block stylesheet %}
     <style>
-        body { margin: 0; padding: 0; }
-        #map {
-            position: relative;
-            top: 0;
-            bottom: 0;
-            width: 600px;
-            height: 700px;
-            margin: 0 auto;
-        }
-        .marker {
-            background-color: black;
-            background-size: cover;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .mapboxgl-popup {
-        max-width: 200px;
-        }
-
-        #menu {
-            background: #fff;
-            padding: 10px;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            justify-content: center;
-        }
-
-        #menu > label {
-            margin-right: 10px;
-        }
     </style>
 {% endblock %}
 
 {% block body %}
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
     <div id='map'></div>
     <div id="menu">
         <input id="streets-v11" type="radio" name="rtoggle" value="streets" />
@@ -81,12 +52,13 @@
                 'source': 'ardeche_geojson',
                 'layout': {},
                 'paint': {
-                    'fill-color': '#00f5ff',
+                    {#'fill-color': '#00f5ff',#}
+                    'fill-color': '#008000',
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.1,
-                        0.4
+                        0.2,
+                        0.5
                     ]
                 }
             });
@@ -188,9 +160,9 @@
                     'circle-color': [
                         'step',
                         ['get', 'point_count'],
-                        '#51bbd6',
+                        '#42DBA7',
                         100,
-                        '#f1f075',
+                        '#42DBA7',
                         750,
                         '#f28cb1'
                     ],
@@ -224,10 +196,11 @@
                 source: 'ardeche_cities',
                 filter: ['!', ['has', 'point_count']],
                 paint: {
-                    'circle-color': '#11b4da',
-                    'circle-radius': 4,
-                    'circle-stroke-width': 1,
-                    'circle-stroke-color': '#fff'
+                    'circle-color': '#42DBA7',
+                    {#'circle-color': '#4B6773',#}
+                    'circle-radius': 6,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#000'
                 }
             });
         }
@@ -236,6 +209,23 @@
         map.on('load', function() {
 
             addDataLayer();
+
+            map.addControl(
+                new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken,
+                    mapboxgl: mapboxgl
+                })
+            );
+
+            // Add geolocate control to the map.
+            map.addControl(
+                new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: true
+                    },
+                    trackUserLocation: true
+                })
+            );
 
             // Add zoom and rotation controls to the map.
             map.addControl(new mapboxgl.NavigationControl());
@@ -405,9 +395,9 @@
                     new mapboxgl.Popup()
                         .setLngLat(coordinates)
                         .setHTML(
-                            '<strong>Marché de ' + name + ' - ' + zip_code + '</strong><br/>' +
-                            '<p>' + location + '</p>' +
-                            '<p>' + day + ' de ' + from + ' à ' + to + '</p>' +
+                            '<p class="market">Marché de ' + name + '</p>' +
+                            '<p class="location">' + location + ' - <span>' + zip_code + '</span></p>' +
+                            '<p class="from_to">' + day.toUpperCase() + ' de ' + from + ' à ' + to + '</p>' +
                             '<em>' + info + '</em>'
                         )
                         .addTo(map);
